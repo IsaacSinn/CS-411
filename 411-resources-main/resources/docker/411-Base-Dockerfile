@@ -26,7 +26,11 @@
 # # -v attaches the volume
 # # -p maps the https port (443) from the host into the container
 
-# docker run -it -v /container_storage:/usr/src/app -p 443:443 --name my-411-container 411-base-image:1.0.0
+# docker run -it \
+#            -v </path/to/container_storage>/container_storage:/usr/src/app \
+#            -p 443:443 \
+#            --name my-411-container \
+#            411-base-image:1.0.0
 
 # # note that you MUST specify a path to container_storage. If it is in the same directory as where you are
 # # running docker it's at .
