@@ -11,11 +11,32 @@ configure_logger(logger)
 
 
 class BattleModel:
+    """
+    A class to simulate a battle between meals, where two combatants enter, and one leaves as the winner.
+
+    Attributes:
+        combatants (List[Meal]): A list to store the meals prepared for battle.
+    """
 
     def __init__(self):
+        """
+        Initializes the BattleModel with an empty list of combatants.
+        """
+
         self.combatants: List[Meal] = []
 
     def battle(self) -> str:
+        """
+        Conducts a battle between two meals. The winner is determined based on the score difference
+        and a random number from a defined source.
+
+        Raises:
+            ValueError: If there are fewer than two combatants.
+
+        Returns:
+            str: The name of the winning meal.
+        """
+
         logger.info("Two meals enter, one meal leaves!")
 
         if len(self.combatants) < 2:
@@ -69,10 +90,22 @@ class BattleModel:
         return winner.meal
 
     def clear_combatants(self):
+        """
+        Clears the list of combatants in preparation for a new battle.
+        """
         logger.info("Clearing the combatants list.")
         self.combatants.clear()
 
     def get_battle_score(self, combatant: Meal) -> float:
+        """
+        Calculates the battle score for a combatant based on its price, cuisine, and difficulty.
+
+        Args:
+            combatant (Meal): The meal combatant to calculate the score for.
+
+        Returns:
+            float: The calculated battle score.
+        """
         difficulty_modifier = {"HIGH": 1, "MED": 2, "LOW": 3}
 
         # Log the calculation process
@@ -88,10 +121,25 @@ class BattleModel:
         return score
 
     def get_combatants(self) -> List[Meal]:
+        """
+        Retrieves the current list of combatants.
+
+        Returns:
+            List[Meal]: The list of meals currently prepared for battle.
+        """
         logger.info("Retrieving current list of combatants.")
         return self.combatants
 
     def prep_combatant(self, combatant_data: Meal):
+        """
+        Adds a combatant to the list of meals prepared for battle.
+
+        Args:
+            combatant_data (Meal): The meal to add as a combatant.
+
+        Raises:
+            ValueError: If the list of combatants already has two meals.
+        """
         if len(self.combatants) >= 2:
             logger.error("Attempted to add combatant '%s' but combatants list is full", combatant_data.meal)
             raise ValueError("Combatant list is full, cannot add more combatants.")
