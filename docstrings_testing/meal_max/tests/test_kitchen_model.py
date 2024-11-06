@@ -13,11 +13,7 @@ from meal_max.models.kitchen_model import (
 )
 import re
 
-######################################################
-#
-#    Fixtures
-#
-######################################################
+# Fixtures
 
 def normalize_whitespace(sql_query: str) -> str:
     return re.sub(r'\s+', ' ', sql_query).strip()
@@ -28,26 +24,20 @@ def mock_cursor(mocker):
     mock_conn = mocker.Mock()
     mock_cursor = mocker.Mock()
 
-    # Mock the connection's cursor
     mock_conn.cursor.return_value = mock_cursor
-    mock_cursor.fetchone.return_value = None  # Default return for queries
+    mock_cursor.fetchone.return_value = None
     mock_cursor.fetchall.return_value = []
     mock_conn.commit.return_value = None
 
-    # Mock the get_db_connection context manager from sql_utils
     @contextmanager
     def mock_get_db_connection():
-        yield mock_conn  # Yield the mocked connection object
+        yield mock_conn
 
     mocker.patch("meal_max.models.kitchen_model.get_db_connection", mock_get_db_connection)
 
-    return mock_cursor  # Return the mock cursor so we can set expectations per test
+    return mock_cursor
 
-######################################################
-#
-#    Add, Delete, and Retrieve Meals
-#
-######################################################
+# Add, Delete, and Retrieve Meals
 
 def test_create_meal(mock_cursor):
     """Test creating a new meal in the database."""
@@ -77,7 +67,6 @@ def test_create_meal_invalid_difficulty():
 
 def test_delete_meal(mock_cursor):
     """Test marking a meal as deleted."""
-    # Simulate meal exists
     mock_cursor.fetchone.return_value = [False]
     delete_meal(1)
 
@@ -107,3 +96,64 @@ def test_update_meal_stats_win(mock_cursor):
     expected_update = "UPDATE meals SET battles = battles + 1, wins = wins + 1 WHERE id = ?"
     actual_update = mock_cursor.execute.call_args_list[1][0][0].strip()
     assert expected_update.strip() == actual_update
+
+def test_clear_meals(mock_cursor, mocker):
+    """Test clearing all meals from the meals table."""
+    mocker.patch.dict('os.environ', {'SQL_CREATE_TABLE_PATH': 'sql/create_meal_table.sql'})
+    mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data="SQL script to recreate the meals table"))
+
+    clear_meals()
+
+    mock_open.assert_called_once_with('sql/create_meal_table.sql', 'r')
+    mock_cursor.executescript.assert_called_once_with("SQL script to recreate the meals table")
+
+
+def test_get_meal_by_name(mock_cursor):
+    """Test retrieving a meal by its name."""
+    mock_cursor.fetchone.return_value = (1, "Pasta", "Italian", 12.5, "MED", False)
+
+    meal = get_meal_by_name("Pasta")
+
+    expected_meal = Meal(id=1, meal="Pasta", cuisine="Italian", price=12.5, difficulty="MED")
+    assert meal == expected_meal, f"Expected {expected_meal}, but got {meal}"
+
+    expected_query = "SELECT id, meal, cuisine, price, difficulty, deleted FROM meals WHERE meal = ?"
+    actual_query = mock_cursor.execute.call_args[0][0].strip()
+    assert expected_query.strip() == actual_query
+
+    expected_args = ("Pasta",)
+    actual_args = mock_cursor.execute.call_args[0][1]
+    assert expected_args == actual_args, f"Expected arguments {expected_args}, got {actual_args}"
+
+def test_get_meal_by_name_not_found(mock_cursor):
+    """Test retrieving a meal by its name that does not exist."""
+    mock_cursor.fetchone.return_value = None
+
+    with pytest.raises(ValueError, match="Meal with name Pasta not found"):
+        get_meal_by_name("Pasta")
+
+
+def test_get_leaderboard(mock_cursor):
+    """Test retrieving a leaderboard of meals sorted by wins."""
+    mock_cursor.fetchall.return_value = [
+        (1, "Pasta", "Italian", 12.5, "MED", 10, 7, 70),
+        (2, "Pizza", "Italian", 15.0, "LOW", 20, 12, 60),
+        (3, "Sushi", "Japanese", 25.0, "HIGH", 5, 3, 60)
+    ]
+
+    leaderboard = get_leaderboard(sort_by="wins")
+
+    expected_result = [
+        {'id': 1, 'meal': "Pasta", 'cuisine': "Italian", 'price': 12.5, 'difficulty': "MED", 'battles': 10, 'wins': 7, 'win_pct': round(70 * 100, 1)},
+        {'id': 2, 'meal': "Pizza", 'cuisine': "Italian", 'price': 15.0, 'difficulty': "LOW", 'battles': 20, 'wins': 12, 'win_pct': round(60 * 100, 1)},
+        {'id': 3, 'meal': "Sushi", 'cuisine': "Japanese", 'price': 25.0, 'difficulty': "HIGH", 'battles': 5, 'wins': 3, 'win_pct': round(60 * 100, 1)}
+    ]
+    assert leaderboard == expected_result, f"Expected {expected_result}, but got {leaderboard}"
+
+    expected_query = """
+        SELECT id, meal, cuisine, price, difficulty, battles, wins, (wins * 1.0 / battles) AS win_pct
+        FROM meals WHERE deleted = false AND battles > 0
+        ORDER BY wins DESC
+    """
+    actual_query = mock_cursor.execute.call_args[0][0].strip()
+    assert normalize_whitespace(expected_query) == normalize_whitespace(actual_query)
