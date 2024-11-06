@@ -51,7 +51,7 @@ class TestBattleModel:
             meal_2.id if winner_name == "Meal A" else meal_1.id,
             "loss"
         )
-        assert len(battle_model.get_combatants()) == 1  # Ensure loser is removed
+        assert len(battle_model.get_combatants()) == 1
 
     def test_battle_not_enough_combatants(self, battle_model, meal_1):
         battle_model.prep_combatant(meal_1)
@@ -68,13 +68,12 @@ class TestBattleModel:
         score_1 = battle_model.get_battle_score(meal_1)
         score_2 = battle_model.get_battle_score(meal_2)
         
-        # The actual score depends on the specifics of the meal attributes
         assert isinstance(score_1, float)
         assert isinstance(score_2, float)
-        assert score_1 != score_2  # Assumes differing attributes between meal_1 and meal_2
+        assert score_1 != score_2  
 
     def test_battle_winner_determined_by_random(self, battle_model, meal_1, meal_2, mocker):
-        # Force random number to favor the second meal regardless of score
+
         mocker.patch("meal_max.utils.random_utils.get_random", return_value=0.0)
         mocker.patch("meal_max.models.kitchen_model.update_meal_stats")
 
@@ -83,6 +82,6 @@ class TestBattleModel:
         
         winner_name = battle_model.battle()
         
-        assert winner_name == meal_2.meal  # Since delta is 0, meal_2 should win due to forced random value
+        assert winner_name == meal_2.meal
         update_meal_stats.assert_called_with(meal_2.id, "win")
         update_meal_stats.assert_called_with(meal_1.id, "loss")
