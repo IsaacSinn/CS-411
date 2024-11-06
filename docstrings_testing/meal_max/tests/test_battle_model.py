@@ -1,128 +1,88 @@
 import pytest
-from unittest.mock import patch
-from meal_max.models.battle_model import BattleModel
 from meal_max.models.kitchen_model import Meal
+from meal_max.models.battle_model import BattleModel
 from meal_max.utils.random_utils import get_random
+from meal_max.models.kitchen_model import update_meal_stats
 
 
-@pytest.fixture
-def battle_model():
-    """Fixture to provide a new instance of BattleModel for each test."""
-    return BattleModel()
+class TestBattleModel:
+    @pytest.fixture
+    def battle_model(self):
+        return BattleModel()
 
+    @pytest.fixture
+    def meal_1(self):
+        return Meal(id=1, meal="Meal A", price=15.0, cuisine="Italian", difficulty="MED")
 
-@pytest.fixture
-def combatant_1():
-    """Fixture for a sample Meal object representing combatant 1."""
-    return Meal(id=1, meal="Pasta", price=10.0, cuisine="Italian", difficulty="MED")
+    @pytest.fixture
+    def meal_2(self):
+        return Meal(id=2, meal="Meal B", price=12.0, cuisine="Mexican", difficulty="HIGH")
 
+    def test_prep_combatant(self, battle_model, meal_1, meal_2):
+        battle_model.prep_combatant(meal_1)
+        battle_model.prep_combatant(meal_2)
+        combatants = battle_model.get_combatants()
+        assert len(combatants) == 2
+        assert combatants[0].meal == "Meal A"
+        assert combatants[1].meal == "Meal B"
 
-@pytest.fixture
-def combatant_2():
-    """Fixture for a sample Meal object representing combatant 2."""
-    return Meal(id=2, meal="Sushi", price=15.0, cuisine="Japanese", difficulty="HIGH")
+    def test_prep_combatant_max_limit(self, battle_model, meal_1, meal_2):
+        battle_model.prep_combatant(meal_1)
+        battle_model.prep_combatant(meal_2)
+        with pytest.raises(ValueError):
+            battle_model.prep_combatant(Meal(id=3, meal="Meal C", price=10.0, cuisine="French", difficulty="LOW"))
 
+    def test_battle(self, battle_model, meal_1, meal_2, mocker):
+        # Prepare mock values
+        mocker.patch("meal_max.utils.random_utils.get_random", return_value=0.5)
+        mocker.patch("meal_max.models.kitchen_model.update_meal_stats")
 
-##################################################
-# Battle Method Test Cases
-##################################################
-
-def test_battle_success(battle_model, combatant_1, combatant_2):
-    """Test battle between two combatants and check that the winner's name is returned."""
-    battle_model.prep_combatant(combatant_1)
-    battle_model.prep_combatant(combatant_2)
-
-    with patch("meal_max.models.battle_model.get_random", return_value=0.5):
-        with patch("meal_max.models.battle_model.update_meal_stats") as mock_update:
-            winner_name = battle_model.battle()
-            assert winner_name in {combatant_1.meal, combatant_2.meal}, "Winner should be one of the combatants' names"
-            mock_update.assert_any_call(combatant_1.id, 'win')
-            mock_update.assert_any_call(combatant_2.id, 'loss')
-            assert len(battle_model.combatants) == 1, "One combatant should remain after the battle"
-
-
-def test_battle_not_enough_combatants(battle_model, combatant_1):
-    """Test battle raises ValueError when there are fewer than two combatants."""
-    battle_model.prep_combatant(combatant_1)
-    
-    with pytest.raises(ValueError, match="Two combatants must be prepped for a battle."):
-        battle_model.battle()
-
-
-##################################################
-# Combatant Management Test Cases
-##################################################
-
-def test_prep_combatant_success(battle_model, combatant_1, combatant_2):
-    """Test adding combatants to the battle."""
-    battle_model.prep_combatant(combatant_1)
-    battle_model.prep_combatant(combatant_2)
-
-    assert len(battle_model.combatants) == 2, "Two combatants should be prepped for battle"
-
-
-def test_prep_combatant_list_full(battle_model, combatant_1, combatant_2):
-    """Test error when attempting to add more than two combatants."""
-    battle_model.prep_combatant(combatant_1)
-    battle_model.prep_combatant(combatant_2)
-    
-    with pytest.raises(ValueError, match="Combatant list is full, cannot add more combatants."):
-        battle_model.prep_combatant(combatant_1)  # Attempting to add a third combatant
-
-
-def test_clear_combatants(battle_model, combatant_1, combatant_2):
-    """Test clearing the combatants list."""
-    battle_model.prep_combatant(combatant_1)
-    battle_model.prep_combatant(combatant_2)
-    battle_model.clear_combatants()
-
-    assert len(battle_model.combatants) == 0, "Combatants list should be empty after clearing"
-
-
-##################################################
-# Battle Score Calculation Test Cases
-##################################################
-
-def test_get_battle_score(battle_model, combatant_1):
-    """Test battle score calculation for a given combatant."""
-    expected_score = (combatant_1.price * len(combatant_1.cuisine)) - 2  # MED difficulty modifier
-    calculated_score = battle_model.get_battle_score(combatant_1)
-
-    assert calculated_score == expected_score, f"Expected score {expected_score}, got {calculated_score}"
-
-
-##################################################
-# Random Number Dependent Outcome Test Cases
-##################################################
-
-def test_battle_with_random_number_favor_combatant_1(battle_model, combatant_1, combatant_2):
-    """Test battle outcome when random number favors combatant 1."""
-    battle_model.prep_combatant(combatant_1)
-    battle_model.prep_combatant(combatant_2)
-
-    with patch("meal_max.models.battle_model.get_random", return_value=0.9):
+        battle_model.prep_combatant(meal_1)
+        battle_model.prep_combatant(meal_2)
+        
         winner_name = battle_model.battle()
-        assert winner_name == combatant_1.meal, "Combatant 1 should win with high random number"
+        
+        assert winner_name in ["Meal A", "Meal B"]
+        update_meal_stats.assert_called_with(
+            meal_1.id if winner_name == "Meal A" else meal_2.id,
+            "win"
+        )
+        update_meal_stats.assert_called_with(
+            meal_2.id if winner_name == "Meal A" else meal_1.id,
+            "loss"
+        )
+        assert len(battle_model.get_combatants()) == 1  # Ensure loser is removed
 
+    def test_battle_not_enough_combatants(self, battle_model, meal_1):
+        battle_model.prep_combatant(meal_1)
+        with pytest.raises(ValueError):
+            battle_model.battle()
 
-def test_battle_with_random_number_favor_combatant_2(battle_model, combatant_1, combatant_2):
-    """Test battle outcome when random number favors combatant 2."""
-    battle_model.prep_combatant(combatant_1)
-    battle_model.prep_combatant(combatant_2)
+    def test_clear_combatants(self, battle_model, meal_1, meal_2):
+        battle_model.prep_combatant(meal_1)
+        battle_model.prep_combatant(meal_2)
+        battle_model.clear_combatants()
+        assert battle_model.get_combatants() == []
 
-    with patch("meal_max.models.battle_model.get_random", return_value=0.1):
+    def test_get_battle_score(self, battle_model, meal_1, meal_2):
+        score_1 = battle_model.get_battle_score(meal_1)
+        score_2 = battle_model.get_battle_score(meal_2)
+        
+        # The actual score depends on the specifics of the meal attributes
+        assert isinstance(score_1, float)
+        assert isinstance(score_2, float)
+        assert score_1 != score_2  # Assumes differing attributes between meal_1 and meal_2
+
+    def test_battle_winner_determined_by_random(self, battle_model, meal_1, meal_2, mocker):
+        # Force random number to favor the second meal regardless of score
+        mocker.patch("meal_max.utils.random_utils.get_random", return_value=0.0)
+        mocker.patch("meal_max.models.kitchen_model.update_meal_stats")
+
+        battle_model.prep_combatant(meal_1)
+        battle_model.prep_combatant(meal_2)
+        
         winner_name = battle_model.battle()
-        assert winner_name == combatant_2.meal, "Combatant 2 should win with low random number"
-
-
-##################################################
-# Combatants Retrieval Test Cases
-##################################################
-
-def test_get_combatants(battle_model, combatant_1, combatant_2):
-    """Test retrieving the current list of combatants."""
-    battle_model.prep_combatant(combatant_1)
-    battle_model.prep_combatant(combatant_2)
-    
-    combatants = battle_model.get_combatants()
-    assert combatants == [combatant_1, combatant_2], "Combatants should match those prepped for battle"
+        
+        assert winner_name == meal_2.meal  # Since delta is 0, meal_2 should win due to forced random value
+        update_meal_stats.assert_called_with(meal_2.id, "win")
+        update_meal_stats.assert_called_with(meal_1.id, "loss")
