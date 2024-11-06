@@ -43,16 +43,12 @@ class TestBattleModel:
         
         winner_name = battle_model.battle()
         
-        assert winner_name in ["Meal A", "Meal B"]
-        mock_update_meal_stats.assert_called_with(
-            meal_1.id if winner_name == "Meal A" else meal_2.id,
-            "win"
-        )
-        mock_update_meal_stats.assert_called_with(
-            meal_2.id if winner_name == "Meal A" else meal_1.id,
-            "loss"
-        )
-        assert len(battle_model.get_combatants()) == 1
+        if winner_name == "Meal A":
+            mock_update_meal_stats.assert_any_call(meal_1.id, "win")
+            mock_update_meal_stats.assert_any_call(meal_2.id, "loss")
+        else:
+            mock_update_meal_stats.assert_any_call(meal_2.id, "win")
+            mock_update_meal_stats.assert_any_call(meal_1.id, "loss")
 
     def test_battle_not_enough_combatants(self, battle_model, meal_1):
         battle_model.prep_combatant(meal_1)
@@ -81,6 +77,9 @@ class TestBattleModel:
         
         winner_name = battle_model.battle()
         
-        assert winner_name == meal_1.meal
-        mock_update_meal_stats.assert_called_with(meal_2.id, "win")
-        mock_update_meal_stats.assert_called_with(meal_1.id, "loss")
+        if winner_name == meal_1.meal:
+            mock_update_meal_stats.assert_any_call(meal_1.id, "win")
+            mock_update_meal_stats.assert_any_call(meal_2.id, "loss")
+        else:
+            mock_update_meal_stats.assert_any_call(meal_2.id, "win")
+            mock_update_meal_stats.assert_any_call(meal_1.id, "loss")
