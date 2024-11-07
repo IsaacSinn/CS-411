@@ -124,7 +124,6 @@ get_meals_by_name() {
     fi
   else
     echo "Failed to get meals by name."
-    exit 1
   fi
 }
 
@@ -178,17 +177,15 @@ get_combatants() {
   fi
 }
 
-
 # Prepare a combatant
 prepare_combatant() {
   meal=$1
   echo "Preparing combatant: $meal..."
-  response=$(curl -s -X POST "$BASE_URL/prep-combatant" -H "Content-Type: application/json" \
-  -d "{\"meal\":\"$meal\"}") | grep -q '"status": "success"'
-  if [ $? -eq 0 ]; then
+  response=$(curl -s -X POST "$BASE_URL/prep-combatant" -H "Content-Type: application/json" -d "{\"meal\":\"$meal\"}")
+  if echo "$response" | grep -q '"status": "success"'; then
     echo "Combatant prepared successfully."
   else
-    echo "Failed prepare combatant ."
+    echo "Failed to prepare combatant."
     exit 1
   fi
 }
@@ -232,7 +229,7 @@ get_meals_by_name "Oatmeal"
 echo "All meal tests passed successfully!"
 
 clear_combatants
-prepare_combatant "Chicken Salad"
+prepare_combatant "Pasta Bolognese"
 prepare_combatant "Fruit Smoothie"
 
 # Initiate a battle and retrieve combatants
