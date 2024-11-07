@@ -1,10 +1,16 @@
 #!/bin/bash
 
 # Define the base URL for the Flask API
-BASE_URL="http://localhost:5000/api"
+BASE_URL="http://localhost:5001/api"
 
 # Flag to control whether to echo JSON output
 ECHO_JSON=false
+
+# Check if jq is installed (used to format JSON output)
+if ! command -v jq &> /dev/null
+then
+  echo "jq is not installed. Some operations will not display formatted JSON."
+fi
 
 # Parse command-line arguments
 while [ "$#" -gt 0 ]; do
@@ -14,7 +20,6 @@ while [ "$#" -gt 0 ]; do
   esac
   shift
 done
-
 
 ###############################################
 #
@@ -58,16 +63,14 @@ clear_meals() {
 }
 
 create_meal() {
-  name=$1
-  category=$2
-  calories=$3
-  protein=$4
-  carbs=$5
-  fats=$6
+  meal=$1
+  cuisine=$2
+  price=$3
+  difficulty=$4
 
-  echo "Adding meal ($name, Category: $category) to the database..."
+  echo "Adding meal: $meal ($cuisine) - Price: $price, Difficulty: $difficulty..."
   curl -s -X POST "$BASE_URL/create-meal" -H "Content-Type: application/json" \
-    -d "{\"name\":\"$name\", \"category\":\"$category\", \"calories\":$calories, \"protein\":$protein, \"carbs\":$carbs, \"fats\":$fats}" | grep -q '"status": "success"'
+    -d "{\"meal\":\"$meal\", \"cuisine\":\"$cuisine\", \"price\":$price, \"difficulty\":\"$difficulty\"}" | grep -q '"status": "success"'
 
   if [ $? -eq 0 ]; then
     echo "Meal added successfully."
@@ -90,21 +93,6 @@ delete_meal_by_id() {
   fi
 }
 
-get_all_meals() {
-  echo "Getting all meals in the database..."
-  response=$(curl -s -X GET "$BASE_URL/get-all-meals")
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "All meals retrieved successfully."
-    if [ "$ECHO_JSON" = true ]; then
-      echo "Meals JSON:"
-      echo "$response" | jq .
-    fi
-  else
-    echo "Failed to get meals."
-    exit 1
-  fi
-}
-
 get_meal_by_id() {
   meal_id=$1
 
@@ -122,58 +110,101 @@ get_meal_by_id() {
   fi
 }
 
-get_meals_by_category() {
-  category=$1
+get_meals_by_name() {
+  name=$1
 
-  echo "Getting meals by category ($category)..."
-  response=$(curl -s -X GET "$BASE_URL/get-meals-by-category?category=$(echo $category | sed 's/ /%20/g')")
+  echo "Getting meals by name ($name)..."
+  # Fixing the parameter issue by using `name`
+  response=$(curl -s -X GET "$BASE_URL/get-meal-by-name/$name")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Meals retrieved successfully by category."
+    echo "Meals retrieved successfully by name."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Meals JSON (by category):"
+      echo "Meals JSON (by name):"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get meals by category."
+    echo "Failed to get meals by name."
     exit 1
   fi
 }
 
-get_random_meal() {
-  echo "Getting a random meal from the database..."
-  response=$(curl -s -X GET "$BASE_URL/get-random-meal")
+##########################################################
+#
+# Battle Management
+#
+##########################################################
+
+# Initiate a battle
+initiate_battle() {
+  echo "Initiating a battle..."
+  response=$(curl -s -X GET "$BASE_URL/battle")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Random meal retrieved successfully."
+    echo "Battle initiated successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Random Meal JSON:"
+      echo "Battle JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get a random meal."
+    echo "Failed to initiate battle."
+    exit 1
+  fi
+}
+
+# Clear all combatants
+clear_combatants() {
+  echo "Clearing all combatants..."
+  response=$(curl -s -X POST "$BASE_URL/clear-combatants")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Combatants cleared successfully."
+  else
+    echo "Failed to clear combatants."
+    exit 1
+  fi
+}
+
+# Get the list of combatants
+get_combatants() {
+  echo "Retrieving list of combatants..."
+  response=$(curl -s -X GET "$BASE_URL/get-combatants")
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Combatants retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Combatants JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to retrieve combatants."
     exit 1
   fi
 }
 
 
-############################################################
-#
-# Meal Nutritional Information
-#
-############################################################
+# Prepare a combatant
+prepare_combatant() {
+  meal=$1
+  echo "Preparing combatant: $meal..."
+  response=$(curl -s -X POST "$BASE_URL/prep-combatant" -H "Content-Type: application/json" \
+  -d "{\"meal\":\"$meal\"}") | grep -q '"status": "success"'
+  if [ $? -eq 0 ]; then
+    echo "Combatant prepared successfully."
+  else
+    echo "Failed prepare combatant ."
+    exit 1
+  fi
+}
 
-get_meal_nutritional_info() {
-  meal_id=$1
-  echo "Getting nutritional information for meal ID ($meal_id)..."
-  response=$(curl -s -X GET "$BASE_URL/get-nutritional-info/$meal_id")
-
+# Get the leaderboard
+get_leaderboard() {
+  echo "Retrieving leaderboard..."
+  response=$(curl -s -X GET "$BASE_URL/leaderboard")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Nutritional information retrieved successfully."
+    echo "Leaderboard retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Nutritional Info JSON:"
+      echo "Leaderboard JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to retrieve nutritional information."
+    echo "Failed to retrieve leaderboard."
     exit 1
   fi
 }
@@ -187,19 +218,28 @@ check_db
 clear_meals
 
 # Create meals
-create_meal "Chicken Salad" "Lunch" 300 25 10 15
-create_meal "Fruit Smoothie" "Breakfast" 200 5 30 2
-create_meal "Pasta Bolognese" "Dinner" 450 20 40 10
-create_meal "Greek Yogurt" "Snack" 150 10 15 5
-create_meal "Oatmeal" "Breakfast" 250 8 40 4
+create_meal "Chicken Salad" "Lunch" 300 "MED"
+create_meal "Fruit Smoothie" "Breakfast" 200 "LOW"
+create_meal "Pasta Bolognese" "Dinner" 450 "HIGH"
+create_meal "Greek Yogurt" "Snack" 150 "LOW"
+create_meal "Oatmeal" "Breakfast" 250 "MED"
 
 delete_meal_by_id 1
-get_all_meals
-
 get_meal_by_id 2
-get_meals_by_category "Breakfast"
-get_random_meal
 
-get_meal_nutritional_info 2
+get_meals_by_name "Oatmeal"
 
 echo "All meal tests passed successfully!"
+
+clear_combatants
+prepare_combatant "Chicken Salad"
+prepare_combatant "Fruit Smoothie"
+
+# Initiate a battle and retrieve combatants
+initiate_battle
+get_combatants
+
+# Retrieve the leaderboard
+get_leaderboard
+
+echo "All battle tests passed successfully!"
