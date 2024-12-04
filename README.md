@@ -26,3 +26,108 @@ The Movie Recommendation System is a web application designed to provide persona
     "username": "string",
     "password": "string"
   }
+  ```
+- **Response Format**:
+  ```json
+  {
+    "message": "Login successful."
+  }
+  ```
+
+### 2. `/login`
+- **Request Type**: `POST`
+- **Purpose**: Log in to an existing user account.
+- **Request Format**:
+  ```json
+  {
+    "username": "string",
+    "password": "string"
+  }
+  ```
+- **Response Format**:
+  ```json
+  {
+    "message": "Login successful."
+  }
+  ```
+
+### 3. `/update-password`
+- **Request Type**: `POST`
+- **Purpose**: Update the user's password.
+- **Request Format**:
+  ```json
+  {
+    "username": "string",
+    "old_password": "string",
+    "new_password": "string"
+  }
+  ```
+- **Response Format**:
+  ```json
+  {
+    "message": "Password updated successfully."
+  }
+  ```
+
+### 4. `/get-recommendations`
+- **Request Type**: `POST`
+- **Purpose**: Get movie recommendations based on genre and region.
+- **Request Format**:
+  ```json
+  {
+    "genre": "string",
+    "region": "string"
+  }
+  ```
+- **Response Format**:
+  ```json
+  {
+    "recommendations": [
+      {
+        "title": "string",
+        "overview": "string",
+        "release_date": "string"
+      }
+    ]
+  }
+  ```
+
+### 5. `/add-to-watchlist`
+- **Request Type**: `POST`
+- **Purpose**: Add a movie to the user's watchlist.
+- **Request Format**:
+  ```json
+  {
+    "username": "string",
+    "movie_id": "int"
+  }
+  ```
+- **Response Format**:
+  ```json
+  {
+    "message": "Movie added to watchlist."
+  }
+  ```
+
+### 6. `/get-watchlist`
+- **Request Type**: `POST`
+- **Purpose**: Retrieve the user's watchlist.
+- **Request Format**:
+  ```json
+  {
+    "username": "string"
+  }
+  ```
+- **Response Format**:
+  ```json
+  {
+    "watchlist": [
+      {
+        "title": "string",
+        "overview": "string",
+        "release_date": "string",
+        "rating": "float"
+      }
+    ]
+  }
+  ```
