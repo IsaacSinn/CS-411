@@ -69,9 +69,31 @@ The Movie Recommendation System is a web application designed to provide persona
   }
   ```
 
-### 4. `/get-recommendations`
+### 4. `/get-recommendation-from-movies`
 - **Request Type**: `POST`
-- **Purpose**: Get movie recommendations based on genre and region.
+- **Purpose**: Get movie recommendations based other movies.
+- **Request Format**:
+  ```json
+  {
+    "title": "string",
+    "region": "string"
+  }
+  ```
+- **Response Format**:
+  ```json
+  {
+    "recommendations": [
+      {
+        "title": "string",
+        "release_date": "string"
+      }
+    ]
+  }
+  ```
+
+### 5. `/get-recommendation-from-genre`
+- **Request Type**: `POST`
+- **Purpose**: Get movie recommendations based on genre.
 - **Request Format**:
   ```json
   {
@@ -85,48 +107,70 @@ The Movie Recommendation System is a web application designed to provide persona
     "recommendations": [
       {
         "title": "string",
-        "overview": "string",
         "release_date": "string"
       }
     ]
   }
   ```
 
-### 5. `/add-to-watchlist`
+### 6. `/get-random-recommendation`
 - **Request Type**: `POST`
-- **Purpose**: Add a movie to the user's watchlist.
+- **Purpose**: Get a random movie recommendation.
 - **Request Format**:
   ```json
   {
-    "username": "string",
-    "movie_id": "int"
+    "region": "string"
   }
   ```
 - **Response Format**:
   ```json
   {
-    "message": "Movie added to watchlist."
-  }
-  ```
-
-### 6. `/get-watchlist`
-- **Request Type**: `POST`
-- **Purpose**: Retrieve the user's watchlist.
-- **Request Format**:
-  ```json
-  {
-    "username": "string"
-  }
-  ```
-- **Response Format**:
-  ```json
-  {
-    "watchlist": [
+    "recommendations": [
       {
         "title": "string",
-        "overview": "string",
+        "release_date": "string"
+      }
+    ]
+  }
+  ```
+  
+### 7. `/Get-summery-of-movie`
+- **Request Type**: `POST`
+- **Purpose**: Get a movie summery.
+- **Request Format**:
+  ```json
+  {
+    "title": "string"
+  }
+  ```
+- **Response Format**:
+  ```json
+  {
+    "recommendations": [
+      {
+        "title": "string",
         "release_date": "string",
-        "rating": "float"
+        "summery": "string",
+      }
+    ]
+  }
+  ```
+### 8. `/Get-trending-movie`
+- **Request Type**: `POST`
+- **Purpose**: Get a trending movie.
+- **Request Format**:
+  ```json
+  {
+
+  }
+  ```
+- **Response Format**:
+  ```json
+  {
+    "recommendations": [
+      {
+        "title": "string",
+        "release_date": "string",
       }
     ]
   }
