@@ -1,0 +1,109 @@
+from flask import Flask, request, jsonify
+from sqlalchemy.exc import IntegrityError
+from models.user import User
+from models import SessionLocal
+
+import hashlib
+import os
+
+app = Flask(__name__)
+
+# Database session setup
+db_session = SessionLocal()
+
+@app.route('/health-check', methods=['GET'])
+def health_check():
+    """Verify the app is running."""
+    return jsonify({"status": "ok"}), 200
+
+@app.route('/create-account', methods=['POST'])
+def create_account():
+    """
+    Create a new user account.
+    Expects JSON: {"username": "string", "password": "string"}
+    """
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return jsonify({"error": "Username and password are required."}), 400
+
+    # Generate salt and hashed password
+    salt = os.urandom(16).hex()
+    hashed_password = hashlib.sha256((salt + password).encode()).hexdigest()
+
+    # Create new user
+    new_user = User(username=username, salt=salt, hashed_password=hashed_password)
+
+    try:
+        db_session.add(new_user)
+        db_session.commit()
+    except IntegrityError:
+        db_session.rollback()
+        return jsonify({"error": "Username already exists."}), 409
+
+    return jsonify({"message": "Account created successfully."}), 201
+
+@app.route('/login', methods=['POST'])
+def login():
+    """
+    Log in a user.
+    Expects JSON: {"username": "string", "password": "string"}
+    """
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return jsonify({"error": "Username and password are required."}), 400
+
+    # Retrieve user from the database
+    user = db_session.query(User).filter(User.username == username).first()
+    if not user:
+        return jsonify({"error": "Invalid username or password."}), 401
+
+    # Verify the password
+    hashed_password = hashlib.sha256((user.salt + password).encode()).hexdigest()
+    if hashed_password != user.hashed_password:
+        return jsonify({"error": "Invalid username or password."}), 401
+
+    return jsonify({"message": "Login successful."}), 200
+
+@app.route('/update-password', methods=['POST'])
+def update_password():
+    """
+    Update the user's password.
+    Expects JSON: {"username": "string", "old_password": "string", "new_password": "string"}
+    """
+    data = request.get_json()
+    username = data.get('username')
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+
+    if not username or not old_password or not new_password:
+        return jsonify({"error": "Username, old password, and new password are required."}), 400
+
+    # Retrieve user from the database
+    user = db_session.query(User).filter(User.username == username).first()
+    if not user:
+        return jsonify({"error": "Invalid username or password."}), 401
+
+    # Verify the old password
+    hashed_old_password = hashlib.sha256((user.salt + old_password).encode()).hexdigest()
+    if hashed_old_password != user.hashed_password:
+        return jsonify({"error": "Invalid old password."}), 401
+
+    # Generate new salt and hashed password
+    new_salt = os.urandom(16).hex()
+    new_hashed_password = hashlib.sha256((new_salt + new_password).encode()).hexdigest()
+
+    # Update the database
+    user.salt = new_salt
+    user.hashed_password = new_hashed_password
+    db_session.commit()
+
+    return jsonify({"message": "Password updated successfully."}), 200
+
+if __name__ == '__main__':
+    app.run(debug=True)
