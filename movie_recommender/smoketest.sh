@@ -230,10 +230,11 @@ get_summary_of_movie() {
 check_health
 create_account
 login_user
-update_password
 delete_user
-get_recommendation_from_movies
-get_recommendation_from_genre
-get_random_recommendation
-get_trending_movie
-get_summary_of_movie
+# update_password
+# delete_user
+# get_recommendation_from_movies
+# get_recommendation_from_genre
+# get_random_recommendation
+# get_trending_movie
+# get_summary_of_movie

@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from models.user import User
 from utils.db_config import Session
 from models.tmdb_model import *
+from utils.create_db import create_db
 
 
 import hashlib
@@ -11,6 +12,7 @@ import os
 app = Flask(__name__)
 
 # Database session setup
+create_db()
 session = Session()
 
 @app.route('/health-check', methods=['GET'])
