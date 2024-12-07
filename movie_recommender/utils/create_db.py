@@ -3,9 +3,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from utils.db_config import Base
 import sqlite3
+from utils.logger import configure_logger
+import logging
 
-db_file = "example.db"
+db_file = "app.db"
 sql_file = "utils/user.sql"
+
+logger = logging.getLogger(__name__)
+configure_logger(logger)
 
 # Check if the database file exists
 if not os.path.exists(db_file):
@@ -15,9 +20,9 @@ if not os.path.exists(db_file):
             sql_script = f.read()
         conn.executescript(sql_script)
 
-    print(f"Database initialized at {db_file}")
+    logger.info(f"Database initialized at {db_file}")
 else:
-    print(f"Database already exists at {db_file}")
+    logger.info(f"Database already exists at {db_file}")
 
 # Set up the SQLAlchemy engine and session
 DATABASE_URL = f"sqlite:///{db_file}"
