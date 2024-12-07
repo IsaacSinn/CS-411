@@ -20,9 +20,9 @@ if not os.path.exists(db_file):
             sql_script = f.read()
         conn.executescript(sql_script)
 
-    logger.info(f"Database initialized at {db_file}")
+    print(f"Database initialized at {db_file}")
 else:
-    logger.info(f"Database already exists at {db_file}")
+    print(f"Database already exists at {db_file}")
 
 # Set up the SQLAlchemy engine and session
 DATABASE_URL = f"sqlite:///{db_file}"
