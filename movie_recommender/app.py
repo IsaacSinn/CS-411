@@ -53,16 +53,26 @@ def delete_user():
         Delete an existing user account.
         Expects JSON: {"username": "string"}
     """
-    data = request.get_json()
-    username = data.get('username')
-    if not username:
-        return jsonify({'error': 'Invalid input, username is required'})
+    try:
+        # Get the JSON data from the request
+        data = request.get_json()
 
-    db_session.delete_user(username)
-    return jsonify({'status': 'user deleted', 'username': username}), 200)
+        # Extract and validate required fields
+        username = data.get('username')
+
+        if not username:
+            return make_response(jsonify({'error': 'Invalid input, username is required'}), 400)
+
+        # Call the User function to delete the user from the database
+        app.logger.info('Deleting user: %s', username)
+        Users.delete_user(username)
+
+        app.logger.info("User deleted: %s", username)
+        return make_response(jsonify({'status': 'user deleted', 'username': username}), 200)
     except Exception as e:
-    app.logger.error("Failed to delete user: %s", str(e))
-    return make_response(jsonify({'error': str(e)}), 500)
+        app.logger.error("Failed to delete user: %s", str(e))
+        return make_response(jsonify({'error': str(e)}), 500)
+
 
 @app.route('/login', methods=['POST'])
 def login():
