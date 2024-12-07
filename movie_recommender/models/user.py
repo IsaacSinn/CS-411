@@ -75,7 +75,8 @@ class User(Base):
         Raises:
             ValueError: If the user does not exist.
         """
-        user = cls.query.filter_by(username=username).first()
+        session = Session()
+        user = session.query(User).filter_by(username=username).first()
         if not user:
             logger.info("User %s not found", username)
             raise ValueError(f"User {username} not found")
@@ -94,13 +95,13 @@ class User(Base):
             ValueError: If the user does not exist.
         """
         session = Session()
-        user = cls.query.filter_by(username=username).first()
+        user = session.query(User).filter_by(username=username).first()
         if not user:
             logger.info("User %s not found", username)
             raise ValueError(f"User {username} not found")
         session.delete(user)
         session.commit()
-        logger.info("User %s deleted successfully", username)
+        print("User %s deleted successfully", username)
         session.close()
     @classmethod
     def update_password(cls, username: str, new_password: str) -> None:
@@ -115,7 +116,7 @@ class User(Base):
             ValueError: If the user does not exist.
         """
         session = Session()
-        user = cls.query.filter_by(username=username).first()
+        user = session.query(User).filter_by(username=username).first()
         if not user:
             logger.info("User %s not found", username)
             raise ValueError(f"User {username} not found")

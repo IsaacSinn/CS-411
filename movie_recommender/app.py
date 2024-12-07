@@ -62,6 +62,8 @@ def delete_user():
         # Extract and validate required fields
         username = data.get('username')
 
+        print(username)
+
         if not username:
             return jsonify({'error': 'Invalid input, username is required'})
 
