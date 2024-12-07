@@ -42,16 +42,32 @@ check_health() {
 
 # Function to create a user
 create_account() {
-  echo "Creating a new account..."
-  curl -s -X POST "$BASE_URL/create-account" -H "Content-Type: application/json" \
-    -d '{"username":"testuser", "password":"password123"}' | grep -q '"message": "Account created successfully."'
-  if [ $? -eq 0 ]; then
-    echo "account created successfully."
+  echo "Creating a new user account..."
+  response=$(curl -s -X POST "$BASE_URL/create-account" -H "Content-Type: application/json" \
+    -d '{"username":"testuser", "password":"password123"}')
+  
+  if echo "$response" | grep -q '"message": "Account created successfully."'; then
+    echo "User account created successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Create Account Response JSON:"
+      echo "$response" | jq .
+    fi
+  elif echo "$response" | grep -q '"error": "Username already exists."'; then
+    echo "Username already exists. Skipping account creation."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Create Account Response JSON:"
+      echo "$response" | jq .
+    fi
   else
-    echo "Failed to create account."
+    echo "Failed to create user account."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Error Response JSON:"
+      echo "$response" | jq .
+    fi
     exit 1
   fi
 }
+
 
 # Function to log in a user
 login_user() {
@@ -230,11 +246,10 @@ get_summary_of_movie() {
 check_health
 create_account
 login_user
-delete_user
-# update_password
+update_password
 # delete_user
-# get_recommendation_from_movies
-# get_recommendation_from_genre
-# get_random_recommendation
-# get_trending_movie
-# get_summary_of_movie
+get_recommendation_from_movies
+get_recommendation_from_genre
+get_random_recommendation
+get_trending_movie
+get_summary_of_movie
