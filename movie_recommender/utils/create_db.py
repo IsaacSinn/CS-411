@@ -4,7 +4,7 @@ from db_config import Base
 import sqlite3
 
 db_file = "example.db"
-sql_file = "/Users/gaudi/Desktop/cs411/411-resources/CS-411/movie_recommender/utils/user.sql"
+sql_file = "user.sql"
 
 with sqlite3.connect(db_file) as conn:
     with open(sql_file, 'r') as f:
