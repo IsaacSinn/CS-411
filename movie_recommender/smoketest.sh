@@ -96,7 +96,7 @@ update_password() {
 
 delete_user() {
   echo "Deleting user account..."
-  response=$(curl -s -X DELETE "$BASE_URL/create-account" -H "Content-Type: application/json" \
+  response=$(curl -s -X DELETE "$BASE_URL/delete-user" -H "Content-Type: application/json" \
     -d '{"username":"testuser"}')
   
   if echo "$response" | grep -q '"status": "user deleted"'; then

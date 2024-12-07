@@ -47,7 +47,7 @@ def create_account():
 
     return jsonify({"message": "Account created successfully."}), 201
 
-@app.route('/create-account', methods=['DELETE'])
+@app.route('/delete-user', methods=['DELETE'])
 def delete_user():
     """
         Delete an existing user account.
