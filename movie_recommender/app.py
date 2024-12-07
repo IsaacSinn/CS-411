@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from movie_recommender.utils.user import User
 from models import SessionLocal
 from utils import Session
-from models import User
+
 
 import hashlib
 import os
@@ -64,7 +64,7 @@ def delete_user():
             return jsonify({'error': 'Invalid input, username is required'})
 
         # Call the User function to delete the user from the database
-        Users.delete_user(username)
+        User.delete_user(username)
 
         return jsonify({'status': 'user deleted', 'username': username})
     except Exception as e:
