@@ -110,7 +110,14 @@
 
 
 import requests
-from utils.api_key import TMDB_KEY
+from dotenv import load_dotenv
+import os
+
+# Load the .env file
+load_dotenv()
+
+# Access the variables
+TMDB_KEY = os.getenv("TMDB_KEY")
 
 def _get_genre_id(genre_name):
     """Fetch the genre ID for a given genre name."""
