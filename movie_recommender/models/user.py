@@ -5,9 +5,7 @@ import os
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import Column, String, Integer
 from utils.logger import configure_logger
-from utils.db_config import Base
-from utils.create_db import Session
-#from models import User
+from utils.db_config import Base, Session
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)

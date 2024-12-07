@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from sqlalchemy.exc import IntegrityError
 from models.user import User
-from utils.create_db import Session
+from utils.db_config import Session
 from models.tmdb_model import *
 
 

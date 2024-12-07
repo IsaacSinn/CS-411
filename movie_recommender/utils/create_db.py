@@ -26,11 +26,5 @@ with sqlite3.connect(db_file) as conn:
     conn.executescript(sql_script)
     print(f"Database initialized at {db_file}")
 
-# Set up the SQLAlchemy engine and session
-DATABASE_URL = f"sqlite:///{db_file}"
-engine = create_engine(DATABASE_URL, echo=True)
-Base.metadata.create_all(engine)  # Ensure tables are created from ORM models
-Session = sessionmaker(bind=engine)
-
 # Log database setup completion
 logger.info("Database setup complete.")
