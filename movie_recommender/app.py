@@ -47,6 +47,23 @@ def create_account():
 
     return jsonify({"message": "Account created successfully."}), 201
 
+@app.route('/create-account', methods=['DELETE'])
+def delete_user():
+    """
+        Delete an existing user account.
+        Expects JSON: {"username": "string"}
+    """
+    data = request.get_json()
+    username = data.get('username')
+    if not username:
+        return jsonify({'error': 'Invalid input, username is required'})
+
+    db_session.delete_user(username)
+    return jsonify({'status': 'user deleted', 'username': username}), 200)
+    except Exception as e:
+    app.logger.error("Failed to delete user: %s", str(e))
+    return make_response(jsonify({'error': str(e)}), 500)
+
 @app.route('/login', methods=['POST'])
 def login():
     """
@@ -106,6 +123,11 @@ def update_password():
     db_session.commit()
 
     return jsonify({"message": "Password updated successfully."}), 200
+
+def get_reccommendation_from_movies():
+    pass;
+
+def get_recommendation_from_genre():
 
 if __name__ == '__main__':
     app.run(debug=True)
