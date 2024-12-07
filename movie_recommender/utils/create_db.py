@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from utils.db_config import Base
 import sqlite3
 
-db_file = "example.db"
+db_file = "app.db"
 sql_file = "utils/user.sql"
 
 with sqlite3.connect(db_file) as conn:
@@ -13,7 +13,7 @@ with sqlite3.connect(db_file) as conn:
 
 print(f"Database initialized at {db_file}")
 
-DATABASE_URL = 'sqlite:///example.db'
+DATABASE_URL = 'sqlite:///app.db'
 engine = create_engine(DATABASE_URL, echo=True)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)

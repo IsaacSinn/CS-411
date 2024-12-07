@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from sqlalchemy.exc import IntegrityError
-from utils.user import User
+from models.user import User
 from utils.create_db import Session
-from utils.tmdb_model import *
+from models.tmdb_model import *
 
 
 import hashlib
