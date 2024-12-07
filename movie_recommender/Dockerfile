@@ -15,11 +15,5 @@ RUN apt-get update && apt-get install -y sqlite3
 # Expose the port the app runs on
 EXPOSE 5000
 
-# Set environment variables
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
-
-# create the database
-
 # Run the application
-CMD ["flask", "run"]
+CMD ["python", "app.py"]
