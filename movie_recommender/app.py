@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from sqlalchemy.exc import IntegrityError
 from movie_recommender.utils.user import User
-from models import SessionLocal
 from utils import Session
 from utils.tmdb_model import *
 
@@ -12,7 +11,7 @@ import os
 app = Flask(__name__)
 
 # Database session setup
-db_session = SessionLocal()
+session = Session()
 
 @app.route('/health-check', methods=['GET'])
 def health_check():
@@ -40,10 +39,10 @@ def create_account():
     new_user = User(username=username, salt=salt, hashed_password=hashed_password)
 
     try:
-        db_session.add(new_user)
-        db_session.commit()
+        session.add(new_user)
+        session.commit()
     except IntegrityError:
-        db_session.rollback()
+        session.rollback()
         return jsonify({"error": "Username already exists."}), 409
 
     return jsonify({"message": "Account created successfully."}), 201
@@ -86,7 +85,7 @@ def login():
         return jsonify({"error": "Username and password are required."}), 400
 
     # Retrieve user from the database
-    user = db_session.query(User).filter(User.username == username).first()
+    user = session.query(User).filter(User.username == username).first()
     if not user:
         return jsonify({"error": "Invalid username or password."}), 401
 
@@ -112,7 +111,7 @@ def update_password():
         return jsonify({"error": "Username, old password, and new password are required."}), 400
 
     # Retrieve user from the database
-    user = db_session.query(User).filter(User.username == username).first()
+    user = session.query(User).filter(User.username == username).first()
     if not user:
         return jsonify({"error": "Invalid username or password."}), 401
 
@@ -128,7 +127,7 @@ def update_password():
     # Update the database
     user.salt = new_salt
     user.hashed_password = new_hashed_password
-    db_session.commit()
+    session.commit()
 
     return jsonify({"message": "Password updated successfully."}), 200
 
@@ -217,5 +216,6 @@ def get_trending_movies():
 
     return jsonify({"trending_movies": trending_movies}), 200
 
+session.close()
 if __name__ == '__main__':
     app.run(debug=True)
