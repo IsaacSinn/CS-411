@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from sqlalchemy.exc import IntegrityError
-from movie_recommender.utils.user import User
-from utils import Session
+from utils.user import User
+from utils.create_db import Session
 from utils.tmdb_model import *
 
 

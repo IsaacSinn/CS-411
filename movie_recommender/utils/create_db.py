@@ -1,10 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from db_config import Base
+from utils.db_config import Base
 import sqlite3
 
 db_file = "example.db"
-sql_file = "user.sql"
+sql_file = "utils/user.sql"
 
 with sqlite3.connect(db_file) as conn:
     with open(sql_file, 'r') as f:
