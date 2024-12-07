@@ -44,7 +44,7 @@ check_health() {
 create_account() {
   echo "Creating a new account..."
   curl -s -X POST "$BASE_URL/create-account" -H "Content-Type: application/json" \
-    -d '{"username":"testuser", "password":"password123"}' | grep -q '"message": "Account created sucessfully."'
+    -d '{"username":"testuser", "password":"password123"}' | grep -q '"message": "Account created successfully."'
   if [ $? -eq 0 ]; then
     echo "account created successfully."
   else
@@ -58,7 +58,7 @@ login_user() {
   echo "Logging in user..."
   response=$(curl -s -X POST "$BASE_URL/login" -H "Content-Type: application/json" \
     -d '{"username":"testuser", "password":"password123"}')
-  if echo "$response" | grep -q '"message": "User testuser logged in successfully."'; then
+  if echo "$response" | grep -q '"message": "Login successful."'; then
     echo "User logged in successfully."
     if [ "$ECHO_JSON" = true ]; then
       echo "Login Response JSON:"
@@ -74,6 +74,166 @@ login_user() {
   fi
 }
 
+update_password() {
+  echo "Updating password..."
+  response=$(curl -s -X POST "$BASE_URL/update-password" -H "Content-Type: application/json" \
+    -d '{"username":"testuser", "old_password":"password123", "new_password":"newpassword123"}')
+  if echo "$response" | grep -q '"message": "Password updated successfully."'; then
+    echo "Password updated successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Update Password Response JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to update password."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Error Response JSON:"
+      echo "$response" | jq .
+    fi
+    exit 1
+  fi
+}
+
+delete_user() {
+  echo "Deleting user account..."
+  response=$(curl -s -X DELETE "$BASE_URL/create-account" -H "Content-Type: application/json" \
+    -d '{"username":"testuser"}')
+  
+  if echo "$response" | grep -q '"status": "user deleted"'; then
+    echo "User account deleted successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Delete User Response JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to delete user account."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Error Response JSON:"
+      echo "$response" | jq .
+    fi
+    exit 1
+  fi
+}
+
+###############################################
+#
+# Get recommendation from movies
+#
+###############################################
+
+get_recommendation_from_movies() {
+  echo "Getting movie recommendations based on other movies..."
+  response=$(curl -s -X POST "$BASE_URL/get-recommendation-from-movies" -H "Content-Type: application/json" \
+    -d '{"title":"Inception", "region":"US"}')
+  if echo "$response" | jq -e '.recommendations | length > 0' > /dev/null; then
+    echo "Movie recommendations retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Recommendations Response JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to retrieve movie recommendations."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Error Response JSON:"
+      echo "$response" | jq .
+    fi
+    exit 1
+  fi
+}
+
+get_recommendation_from_genre() {
+  echo "Getting movie recommendations based on genre..."
+  response=$(curl -s -X POST "$BASE_URL/get-recommendation-from-genre" -H "Content-Type: application/json" \
+    -d '{"genre":"Action", "region":"US"}')
+  if echo "$response" | jq -e '.recommendations | length > 0' > /dev/null; then
+    echo "Genre-based recommendations retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Recommendations Response JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to retrieve genre-based recommendations."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Error Response JSON:"
+      echo "$response" | jq .
+    fi
+    exit 1
+  fi
+}
+
+get_random_recommendation() {
+  echo "Getting a random movie recommendation..."
+  response=$(curl -s -X POST "$BASE_URL/get-random-recommendation" -H "Content-Type: application/json" \
+    -d '{"region":"US"}')
+  if echo "$response" | jq -e '.recommendations | length > 0' > /dev/null; then
+    echo "Random movie recommendation retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Random Recommendation Response JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to retrieve a random movie recommendation."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Error Response JSON:"
+      echo "$response" | jq .
+    fi
+    exit 1
+  fi
+}
+
+get_trending_movie() {
+  echo "Getting trending movie..."
+  response=$(curl -s -X POST "$BASE_URL/get-trending-movie" -H "Content-Type: application/json" -d '{}')
+  if echo "$response" | jq -e '.trending_movies | length > 0' > /dev/null; then
+    echo "Trending movie retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Trending Movie Response JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to retrieve trending movie."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Error Response JSON:"
+      echo "$response" | jq .
+    fi
+    exit 1
+  fi
+}
+
+###############################################
+#
+# Get summary of movie
+#
+###############################################
+
+get_summary_of_movie() {
+  echo "Getting summary of a movie..."
+  response=$(curl -s -X POST "$BASE_URL/Get-summery-of-movie" -H "Content-Type: application/json" \
+    -d '{"title":"Inception"}')
+  if echo "$response" | jq -e '.summery | length > 0' > /dev/null; then
+    echo "Movie summary retrieved successfully."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Movie Summary Response JSON:"
+      echo "$response" | jq .
+    fi
+  else
+    echo "Failed to retrieve movie summary."
+    if [ "$ECHO_JSON" = true ]; then
+      echo "Error Response JSON:"
+      echo "$response" | jq .
+    fi
+    exit 1
+  fi
+}
+
 # Run all the steps in order
 check_health
 create_account
+login_user
+update_password
+delete_user
+get_recommendation_from_movies
+get_recommendation_from_genre
+get_random_recommendation
+get_trending_movie
+get_summary_of_movie
