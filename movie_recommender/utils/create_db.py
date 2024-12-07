@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from user import Base
+from db_config import Base
 import sqlite3
 
 db_file = "example.db"

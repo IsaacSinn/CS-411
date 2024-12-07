@@ -5,14 +5,12 @@ import os
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import Column, String, Integer
 from logger import configure_logger
-from sqlalchemy.ext.declarative import declarative_base
-
+from db_config import Base
 from create_db import Session
-from models import User
+#from models import User
 
 logger = logging.getLogger(__name__)
 configure_logger(logger)
-Base = declarative_base()
 
 class User(Base):
     __tablename__ = 'users'
