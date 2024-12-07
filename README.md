@@ -3,17 +3,30 @@
 ## Overview
 The Movie Recommendation System is a web application designed to provide personalized movie recommendations, allow users to search for movies, and maintain a personal watchlist. This project utilizes Flask for the backend, SQLite for data storage, and the TMDB (The Movie Database) API for movie data.
 
-## Features
-- **Account Management**:
-  - Create a new account, log in, and update passwords securely.
-- **Movie Recommendations**:
-  - Get movie recommendations based on genres or user preferences.
-- **Watchlist Management**:
-  - Add movies to a personal watchlist and retrieve it anytime.
-- **Movie Search**:
-  - Search for movies by title or keywords.
-- **Trending Movies**:
-  - Discover movies trending in the user's region.
+## How to run it
+Navigate to the directory containing Dockerfile
+```bash
+docker build -t flask-app .
+```
+Once the image is built, you can run a container using the following command:
+```bash
+docker run -d -p 5000:5000 --name flask-container flask-app
+```
+
+## Testing Changes
+
+If you make changes to the application code, follow these steps:
+
+1. **Stop the container:**
+  ```bash
+  docker stop flask-container
+  ```
+2. **Remove the container:**
+  ```bash
+  docker rm flask-container
+  ```
+3. **Rebuild the image and run the new container**
+
 
 ## Routes
 
