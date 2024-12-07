@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
 from sqlalchemy.exc import IntegrityError
-from models.user import User
+from movie_recommender.utils.user import User
 from models import SessionLocal
+from utils import Session
+from models import User
 
 import hashlib
 import os
