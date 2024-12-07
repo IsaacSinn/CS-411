@@ -61,17 +61,14 @@ def delete_user():
         username = data.get('username')
 
         if not username:
-            return make_response(jsonify({'error': 'Invalid input, username is required'}), 400)
+            return jsonify({'error': 'Invalid input, username is required'})
 
         # Call the User function to delete the user from the database
-        app.logger.info('Deleting user: %s', username)
         Users.delete_user(username)
 
-        app.logger.info("User deleted: %s", username)
-        return make_response(jsonify({'status': 'user deleted', 'username': username}), 200)
+        return jsonify({'status': 'user deleted', 'username': username})
     except Exception as e:
-        app.logger.error("Failed to delete user: %s", str(e))
-        return make_response(jsonify({'error': str(e)}), 500)
+        return jsonify({'error': str(e)})
 
 
 @app.route('/login', methods=['POST'])
