@@ -33,3 +33,6 @@ check_health() {
     exit 1
   fi
 }
+
+# Run all the steps in order
+check_health
