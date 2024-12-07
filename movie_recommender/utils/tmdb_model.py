@@ -1,5 +1,4 @@
 '''
-
 ### 4. `/get-recommendation-from-movies`
 - **Request Type**: `POST`
 - **Purpose**: Get movie recommendations based other movies.
@@ -131,7 +130,7 @@ def _get_genre_id(genre_name):
     raise ValueError(f"Genre '{genre_name}' not found!")
 
 
-def get_recommendations(genre_name):
+def get_recommendations_for_genre(genre_name):
     """Fetch recommended movies for a specific genre."""
 
     # call _get_genre_id to get the genre id
@@ -153,7 +152,7 @@ def get_recommendations(genre_name):
     movies = response.json()["results"]
     return [movie["title"] for movie in movies]
 
-def get_movie_recommendations(movie_name):
+def get_recommendations_from_movie(movie_name):
     """Fetch recommended movies based on another movie."""
     search_url = f"https://api.themoviedb.org/3/search/movie"
     search_params = {
@@ -223,7 +222,7 @@ def get_movie_summary(movie_name):
     movie = movie_response.json()
     return movie["overview"]
 
-def get_trending_movie():
+def get_trending_movies():
     """Fetch the trending movie."""
     url = f"https://api.themoviedb.org/3/trending/movie/week"
     params = {
@@ -243,7 +242,7 @@ if __name__ == "__main__":
     print("\n ###### Unit test for get_recommendations function ###### \n")
 
     genre_name = "comedy"
-    recommendations = get_recommendations(genre_name)
+    recommendations = get_recommendations_for_genre(genre_name)
 
     print(f"Recommendations for {genre_name}:")
 
@@ -254,7 +253,7 @@ if __name__ == "__main__":
     # Unit test for get_movie_recommendations function
     print("\n ###### Unit test for get_movie_recommendations function ###### \n")
     movie_name = "The Dark Knight"
-    recommendations = get_movie_recommendations(movie_name)
+    recommendations = get_recommendations_from_movie(movie_name)
 
     print(f"Recommendations for {movie_name}:")
     for i, movie in enumerate(recommendations, start=1):
@@ -279,7 +278,7 @@ if __name__ == "__main__":
 
     # Unit test for get_trending_movie function
     print("\n ###### Unit test for get_trending_movie function ###### \n")
-    recommendations = get_trending_movie()
+    recommendations = get_trending_movies()
 
     print("Trending movies:")
 

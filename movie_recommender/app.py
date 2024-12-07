@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from movie_recommender.utils.user import User
 from models import SessionLocal
 from utils import Session
+from utils.tmdb_model import *
 
 
 import hashlib
@@ -131,10 +132,90 @@ def update_password():
 
     return jsonify({"message": "Password updated successfully."}), 200
 
-def get_reccommendation_from_movies():
-    pass;
+@app.route('/get-recommendation-from-movies', methods=['POST'])
+def get_recommendation_from_movies():
+    """
+    Get movie recommendations based on other movies.
+    Expects JSON: {"title": "string"}
+    """
+    data = request.get_json()
+    title = data.get('title')
 
+    if not title:
+        return jsonify({"error": "Title and region are required."}), 400
+
+    # Get recommendations from TMDB
+    recommendations = get_recommendations_from_movie(title)
+
+    return jsonify({"recommendations": recommendations}), 200
+
+@app.route('/get-recommendation-from-genre', methods=['POST'])
 def get_recommendation_from_genre():
+    """
+    Get movie recommendations based on genre.
+    Expects JSON: {"genre": "string"}
+    """
+    data = request.get_json()
+    genre = data.get('genre')
+
+    if not genre:
+        return jsonify({"error": "Genre and region are required."}), 400
+
+    # Get recommendations from TMDB
+    recommendations = get_recommendations_for_genre(genre)
+
+    return jsonify({"recommendations": recommendations}), 200
+
+@app.route('/get-random-recommendation', methods=['POST'])
+def get_random_recommendation():
+    """
+    Get a random movie recommendation.
+    Expects JSON: {"region": "string"}
+    """
+    data = request.get_json()
+    region = data.get('region')
+
+    if not region:
+        return jsonify({"error": "Region is required."}), 400
+
+    # Get recommendations from TMDB
+    recommendations = get_random_recommendation(region)
+
+    return jsonify({"recommendations": recommendations}), 200
+
+@app.route('/get-movie-summary', methods=['POST'])
+def get_movie_summary():
+    """
+    Get a summary of a movie.
+    Expects JSON: {"title": "string"}
+    """
+    data = request.get_json()
+    title = data.get('title')
+
+    if not title:
+        return jsonify({"error": "Title is required."}), 400
+
+    # Get movie summary from TMDB
+    summary = get_movie_summary(title)
+
+    return jsonify(summary), 200
+
+@app.route('/get-trending-movies', methods=['POST'])
+def get_trending_movies():
+    """
+    Get trending movies.
+    Expects JSON: {"region": "string"}
+    """
+    data = request.get_json()
+    region = data.get('region')
+
+    if not region:
+        return jsonify({"error": "Region is required."}), 400
+
+    # Get trending movies from TMDB
+    trending_movies = get_trending_movies(region)
+
+    return jsonify({"trending_movies": trending_movies}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
