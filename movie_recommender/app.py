@@ -47,33 +47,6 @@ def create_account():
 
     return jsonify({"message": "Account created successfully."}), 201
 
-@app.route('/create-account', methods=['DELETE'])
-def delete_user():
-    """
-        Delete an existing user account.
-        Expects JSON: {"username": "string"}
-    """
-    try:
-        # Get the JSON data from the request
-        data = request.get_json()
-
-        # Extract and validate required fields
-        username = data.get('username')
-
-        if not username:
-            return make_response(jsonify({'error': 'Invalid input, username is required'}), 400)
-
-        # Call the User function to delete the user from the database
-        app.logger.info('Deleting user: %s', username)
-        Users.delete_user(username)
-
-        app.logger.info("User deleted: %s", username)
-        return make_response(jsonify({'status': 'user deleted', 'username': username}), 200)
-    except Exception as e:
-        app.logger.error("Failed to delete user: %s", str(e))
-        return make_response(jsonify({'error': str(e)}), 500)
-
-
 @app.route('/login', methods=['POST'])
 def login():
     """
@@ -134,10 +107,16 @@ def update_password():
 
     return jsonify({"message": "Password updated successfully."}), 200
 
-def get_reccommendation_from_movies():
-    pass;
+@app.route('/get-recommendation-from-movies', methods=['POST'])
 
-def get_recommendation_from_genre():
+@app.route('/get-recommendation-from-genre', methods=['POST'])
+
+@app.route('/get-random-recommendation', methods=['POST'])
+
+@app.route('/Get-summery-of-movie', methods=['POST'])
+
+@app.route('/Get-trending-movie', methods=['POST'])
+
 
 if __name__ == '__main__':
     app.run(debug=True)
