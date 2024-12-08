@@ -170,21 +170,33 @@ def get_recommendation_from_genre():
     return jsonify({"recommendations": recommendations}), 200
 
 @app.route('/get-random-recommendation', methods=['POST'])
-def get_random_recommendation():
+def get_random_recommendation_endpoint():
     """
     Get a random movie recommendation.
     Expects JSON: {"region": "string"}
     """
     data = request.get_json()
-    region = data.get('region')
 
+    if not data:
+        return jsonify({"error": "Invalid JSON input."}), 400
+
+    region = data.get('region')
     if not region:
         return jsonify({"error": "Region is required."}), 400
 
-    # Get recommendations from TMDB
-    recommendations = get_random_recommendation(region)
+    try:
+        # Pass the region to the helper function
+        recommendations = get_random_recommendation()
 
-    return jsonify({"recommendations": recommendations}), 200
+        # Respond appropriately if no recommendations are found
+        if not recommendations:
+            return jsonify({"message": "No recommendations found for the specified region."}), 200
+
+        return jsonify({"recommendations": recommendations}), 200
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
 
 @app.route('/get-movie-summary', methods=['POST'])
 def get_movie_summary():
