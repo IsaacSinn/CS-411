@@ -229,7 +229,7 @@ def get_movie_summary(movie_name):
     movie = movie_response.json()
     return movie["overview"]
 
-def get_trending_movies():
+def get_trending_movies_tmdb():
     """Fetch the trending movie."""
     url = f"https://api.themoviedb.org/3/trending/movie/week"
     params = {
@@ -241,6 +241,7 @@ def get_trending_movies():
     response.raise_for_status()
 
     movies = response.json()["results"]
+    print("retreived movies")
     return [movie["title"] for movie in movies]
 
 if __name__ == "__main__":

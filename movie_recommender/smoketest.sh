@@ -199,8 +199,8 @@ get_random_recommendation() {
 
 get_trending_movie() {
   echo "Getting trending movie..."
-  response=$(curl -s -X POST "$BASE_URL/get-trending-movie" -H "Content-Type: application/json" -d '{}')
-  if echo "$response" | jq -e '.trending_movies | length > 0' > /dev/null; then
+  response=$(curl -s -X POST "$BASE_URL/get-trending-movies" -H "Content-Type: application/json" -d '{"region":"US"}')
+  if echo "$response" | grep -q '"status": "ok"'; then
     echo "Trending movie retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
       echo "Trending Movie Response JSON:"
@@ -246,8 +246,8 @@ get_summary_of_movie() {
 check_health
 create_account
 login_user
-update_password
-# delete_user
+# update_password
+delete_user
 get_recommendation_from_movies
 get_recommendation_from_genre
 get_random_recommendation

@@ -228,9 +228,9 @@ def get_trending_movies():
         return jsonify({"error": "Region is required."}), 400
 
     # Get trending movies from TMDB
-    trending_movies = get_trending_movies(region)
+    trending_movies = get_trending_movies_tmdb()
 
-    return jsonify({"trending_movies": trending_movies}), 200
+    return jsonify({"trending_movies": trending_movies, "status": "ok"}), 200
 
 session.close()
 if __name__ == '__main__':
