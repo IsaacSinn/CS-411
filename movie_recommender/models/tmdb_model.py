@@ -286,7 +286,7 @@ if __name__ == "__main__":
 
     # Unit test for get_trending_movie function
     print("\n ###### Unit test for get_trending_movie function ###### \n")
-    recommendations = get_trending_movies()
+    recommendations = get_trending_movies_tmdb()
 
     print("Trending movies:")
 
