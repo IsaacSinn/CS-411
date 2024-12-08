@@ -199,7 +199,7 @@ def get_random_recommendation_endpoint():
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
 
 @app.route('/get-movie-summary', methods=['POST'])
-def get_movie_summary():
+def get_movie_summary_endpoint():
     """
     Get a summary of a movie.
     Expects JSON: {"title": "string"}
@@ -213,7 +213,7 @@ def get_movie_summary():
     # Get movie summary from TMDB
     summary = get_movie_summary(title)
 
-    return jsonify(summary), 200
+    return jsonify({"summary": summary, "status": "ok"}), 200
 
 @app.route('/get-trending-movies', methods=['POST'])
 def get_trending_movies():

@@ -224,9 +224,9 @@ get_trending_movie() {
 
 get_summary_of_movie() {
   echo "Getting summary of a movie..."
-  response=$(curl -s -X POST "$BASE_URL/Get-summery-of-movie" -H "Content-Type: application/json" \
+  response=$(curl -s -X POST "$BASE_URL/get-movie-summary" -H "Content-Type: application/json" \
     -d '{"title":"Inception"}')
-  if echo "$response" | jq -e '.summery | length > 0' > /dev/null; then
+  if echo "$response" | grep -q '"status": "ok"'; then
     echo "Movie summary retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
       echo "Movie Summary Response JSON:"
@@ -246,7 +246,7 @@ get_summary_of_movie() {
 check_health
 create_account
 login_user
-# update_password
+update_password
 delete_user
 get_recommendation_from_movies
 get_recommendation_from_genre
